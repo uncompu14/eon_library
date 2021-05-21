@@ -13,7 +13,7 @@ typedef struct book { // 구조체 선언, 책이름, 저자명, 발행년도, 회사명, 장르
 int add_book(book *book_list, int *nth); // 내용추가
 int search_book(book* book_list, int num_total); // 검색 함수
 int print_book_list(book* book_list, int num_total); // 책 리스트 보여주기
-int book_revise(book* book_list, int num_total);
+int book_revise(book* book_list, int num_total); //책 내용 수정
 
 int main() {
 	int book_save_num = 100;
@@ -21,21 +21,24 @@ int main() {
 	int user_choice;
 	book* book_list;
 
-	book_list = (book *)malloc(sizeof(book) * book_save_num);
-	
+	book_list = (book*)malloc(sizeof(book) * book_save_num);
+
 	FILE* fp;
-	fp = fopen("input.txt", "r");
-	for (int i = 0; i < 6; i++)
+	fp = fopen("input.txt", "rt");
+		
+	for(int i = 0; i < book_save_num; i ++) //최대 저장가능한 책의 갯수만큼 반복
 	{
-		fscanf(fp, "%s %s %s %s %s", book_list[i].book_name, book_list[i].authr_name, book_list[i].year, book_list[i].comp_name, book_list[i].genre);
-		book_num_total++;
+		if (feof(fp) == 0) // input.txt가 끝이 나지 않았다면 실행.
+		{
+			fscanf(fp, "%s %s %s %s %s\n", book_list[i].book_name, book_list[i].authr_name, book_list[i].year, book_list[i].comp_name, book_list[i].genre);
+			++book_num_total;
+		}		
 	}
 	
+	
 
-	while (1)
+	while (1) 
 	{
-		
-		
 		printf("\n도서관리 프로그램\n");
 		printf("메뉴를 선택하세요.\n");
 		printf("1. 도서추가\n");
@@ -59,13 +62,12 @@ int main() {
 		}
 		else if (user_choice == 3)
 		{
-			book_revise(book_list, &book_num_total);
+			book_revise(book_list, book_num_total);
 		}
-		else if (user_choice == 4)
+		else if (user_choice == 4)//삭제할 책번호 입력시 총 책의 갯수를 하나 줄여주고 삭제할 책의 뒷번호 책들을 앞으로 당겨와줌.
 		{
-			//remove_book(book_list, &book_num_total);
 			int num;
-			printf("삭제할 책의 번호를 입력하세요 : ");
+			printf("삭제할 책번호를 입력하세요(ex : 백년아이 책번호는 0) : ");
 			scanf("%d", &num);
 			for (int i = num; i < book_num_total; i++)
 			{
@@ -74,34 +76,30 @@ int main() {
 			--book_num_total;
 			printf("책을 삭제하였습니다\n");
 		}
-		else if (user_choice == 5)
+		else if (user_choice == 5) // 총 책의 갯수만큼 printf 반복
 		{
 			for (int i = 0; i < book_num_total; i++)
 			{
 				printf("책번호 %d : %s %s %s %s %s\n",i, book_list[i].book_name, book_list[i].authr_name, book_list[i].year, book_list[i].comp_name, book_list[i].genre);
 			}
 		}
-		else if (user_choice == 6)
+		else if (user_choice == 6) // wt모드를 사용하여 쓰기모드사용. 책의 갯수만큼 fprintf를 이용하여 메모장에 써줌.
 		{
-			FILE* fp1 = fopen("input.txt", "r+");
+			FILE* fp1 = fopen("input.txt", "wt");
 			for (int i = 0; i < book_num_total; i++)
 			{
-				fscanf(fp1, "%s %s %s %s %s", book_list[i].book_name, book_list[i].authr_name, book_list[i].year, book_list[i].comp_name, book_list[i].genre);
-				fprintf(fp1, "%s %s %s %s %s", book_list[i].book_name, book_list[i].authr_name, book_list[i].year, book_list[i].comp_name, book_list[i].genre);
-				book_num_total++;
+				fprintf(fp1, "%s %s %s %s %s\n", book_list[i].book_name, book_list[i].authr_name, book_list[i].year, book_list[i].comp_name, book_list[i].genre);
 			}
+			fclose(fp1);
 		}
-		else if (user_choice == 7)
+		else if (user_choice == 7) // 자동저장 후 종류
 		{
 			printf("프로그램 종료\n");
-			FILE* fp1 = fopen("input.txt", "r+");
+			FILE* fp1 = fopen("input.txt", "wt");
 			for (int i = 0; i < book_num_total; i++)
 			{
-				fscanf(fp1, "%s %s %s %s %s", book_list[i].book_name, book_list[i].authr_name, book_list[i].year, book_list[i].comp_name, book_list[i].genre);
-				fprintf(fp1, "%s %s %s %s %s", book_list[i].book_name, book_list[i].authr_name, book_list[i].year, book_list[i].comp_name, book_list[i].genre);
-				book_num_total++;
+				fprintf(fp1, "%s %s %s %s %s\n", book_list[i].book_name, book_list[i].authr_name, book_list[i].year, book_list[i].comp_name, book_list[i].genre);
 			}
-
 			fclose(fp);
 			fclose(fp1);
 			break;
@@ -111,7 +109,8 @@ int main() {
 			printf("잘못 입력하셨습니다.\n");
 		}
 	}
-		
+	
+	return 0;
 }
 
 int add_book(book* book_list, int* nth) { // 구조체 북과 책의 숫자를 나타내는 변수
@@ -127,9 +126,10 @@ int add_book(book* book_list, int* nth) { // 구조체 북과 책의 숫자를 나타내는 변
 	scanf("%s", book_list[*nth].genre);
 
 	(*nth)++;
-}
+	return 0;
+} //책의 내용을 추가
 
-int search_book(book* book_list, int num_total) {
+int search_book(book* book_list, int num_total) { //먼저 어떤 기능으로 찾을지 확인 후 문자열 비교 함수를 이용해서 검색
 	int user_input;
 	int i;
 	char user_search[30];
@@ -198,12 +198,11 @@ int search_book(book* book_list, int num_total) {
 	return 0;
 }
 
-int book_revise(book* book_list, int num_total) {
-	char *revise[30];
+int book_revise(book* book_list, int num_total) { //수정할 책의 번호 선택후 수정할 내용 입력하면 복사하여 넣어주기.
+	char revise[30];
 	int i;
 	printf("수정하고 싶은 책의 번호를 선택하세요 : ");
 	scanf("%d", &i);
-	printf("값 확인용 : %s\n", book_list[i].book_name);
 	
 	printf("책의 이름 : ");
 	scanf("%s", revise);
@@ -220,26 +219,7 @@ int book_revise(book* book_list, int num_total) {
 	printf("책의 장르 : ");
 	scanf("%s", revise);
 	strcpy(book_list[i].genre, revise);
+
+	return 0;
 }
 
-int print_book_list(book* book_list, int num_total) {
-	FILE* fp;
-	errno_t err = fopen_s(&fp, "input.txt", "w");
-	if (err == 0)
-	{
-		printf("성공\n");
-	}
-	else
-	{
-		printf("error\n");
-		return	0;
-	}
-
-	fprintf(fp, "%d\n", num_total);
-	for (int i = 0; i < num_total; i++)
-	{
-		fprintf(fp, "s \n %s \n %s \n %s \n %s \n", book_list[i].book_name, book_list[i].authr_name, book_list[i].year, book_list[i].comp_name, book_list[i].genre);
-	}
-	fclose(fp);
-	
-}
